@@ -14,23 +14,13 @@ function Drawer(mask, storage) {
         },
 
         add: function (e) {
-            var circle = LGeo.circle(e.latlng, 25).toGeoJSON()
-            mask.addData(circle)
-            const joinedPolygon = container._joinCircles()
-            storage.set(joinedPolygon)
-        },
-
-        _joinCircles: function() {
-            const maskHoles = mask.holes()
-            for (var i = 0; i < maskHoles.length; ++i) {
-                if (i == 0) {
-                    var joinedPolygon = turf.polygon([maskHoles[i]]);
-                } else {
-                    joinedPolygon = turf.union(joinedPolygon, turf.polygon([maskHoles[i]]));
-                }
+            var holes = LGeo.circle(e.latlng, 25).toGeoJSON()
+            const currentGeoJson = storage.get()
+            if (currentGeoJson) {
+                holes = turf.union(currentGeoJson, holes);
             }
-            mask.setData(joinedPolygon)
-            return joinedPolygon
+            mask.setData(holes)
+            storage.set(holes)
         }
     }
     return container

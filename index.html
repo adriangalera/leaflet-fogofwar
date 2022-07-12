@@ -56,12 +56,13 @@
 
     const storage = new GeoJsonStorage()
     const currentGeoJson = storage.get() || {}
+
     const mask = L.mask(currentGeoJson, { fillOpacity: 0.7, restrictBounds: false, fillColor: '#000000' }).addTo(map);
 
     const drawer = new Drawer(mask, storage);
     map.on('click', drawer.add)
     map.on('contextmenu', drawer.delete);
-
+    
 </script>
 
 </html>
