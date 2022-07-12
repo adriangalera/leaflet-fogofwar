@@ -31,17 +31,19 @@
         }
     </style>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.css">
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-geodesy/v0.1.0/leaflet-geodesy.js'></script>
     <script src='https://unpkg.com/@turf/turf@6/turf.min.js'></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.js"></script>    
+    <script src="https://kit.fontawesome.com/9ed6982e32.js" crossorigin="anonymous"></script>
     <script type="text/javascript" src='mask.js'></script>
     <script type="text/javascript" src='geojson-storage.js'></script>
     <script type="text/javascript" src='draw.js'></script>
 </head>
 
 <body>
-    <div id='map'>
-    </div>
+    <div id='map'></div>
 </body>
 <script type="text/javascript">
 
@@ -62,6 +64,9 @@
     const drawer = new Drawer(mask, storage);
     map.on('click', drawer.add)
     map.on('contextmenu', drawer.delete);
+
+    new Loader(storage, mask).addTo(map)
+    new Saver(storage).addTo(map)
     
 </script>
 
