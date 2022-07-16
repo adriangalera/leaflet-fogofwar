@@ -35,8 +35,9 @@
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-geodesy/v0.1.0/leaflet-geodesy.js'></script>
     <script src='https://unpkg.com/@turf/turf@6/turf.min.js'></script>
-    <script src="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.js"></script>    
+    <script src="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.js"></script>
     <script src="https://kit.fontawesome.com/9ed6982e32.js" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/jsts@1.6.1/dist/jsts.min.js" crossorigin="anonymous"></script>
     <script type="text/javascript" src='mask.js'></script>
     <script type="text/javascript" src='geojson-storage.js'></script>
     <script type="text/javascript" src='draw.js'></script>
@@ -49,7 +50,7 @@
 
     const map = L.map("map", {
         center: [41.53289317099601, 2.104000992549118],
-        zoom: 15
+        zoom: 10
     });
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -62,12 +63,14 @@
     const mask = L.mask(currentGeoJson, { fillOpacity: 0.7, restrictBounds: false, fillColor: '#000000' }).addTo(map);
 
     const drawer = new Drawer(mask, storage);
+    const gpxDrawer = new GpxDrawer(mask, storage);
     map.on('click', drawer.add)
     map.on('contextmenu', drawer.delete);
 
-    new Loader(storage, mask).addTo(map)
-    new Saver(storage).addTo(map)
-    
+    new GeoJsonLoader(storage, mask).addTo(map)
+    new GeoJsonSaver(storage).addTo(map)
+    new GpxAdder(gpxDrawer).addTo(map)
+
 </script>
 
 </html>
