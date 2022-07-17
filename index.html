@@ -57,21 +57,26 @@
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
-
     const storage = new GeoJsonStorage()
-    const currentGeoJson = storage.get() || {}
 
-    const mask = L.mask(currentGeoJson, { fillOpacity: 0.7, restrictBounds: false, fillColor: '#000000' }).addTo(map);
+    storage.get()
+        .then((geoJson) => {
+            if (!geoJson) {
+                geoJson = {}
+            }
+            const mask = L.mask(geoJson, { fillOpacity: 0.7, restrictBounds: false, fillColor: '#000000' }).addTo(map);
 
-    const drawer = new Drawer(mask, storage, map);
-    new DrawingButton(drawer).addTo(map)
-    const gpxDrawer = new GpxDrawer(mask, storage);
-    map.on('click', drawer.onAdd)
-    map.on('contextmenu', drawer.delete);
+            const drawer = new Drawer(mask, storage, map);
+            new DrawingButton(drawer).addTo(map);
+            const gpxDrawer = new GpxDrawer(mask, storage);
+            new GeoJsonLoader(storage, mask).addTo(map)
+            new GeoJsonSaver(storage).addTo(map)
+            new GpxAdder(gpxDrawer).addTo(map)
 
-    new GeoJsonLoader(storage, mask).addTo(map)
-    new GeoJsonSaver(storage).addTo(map)
-    new GpxAdder(gpxDrawer).addTo(map)
+            map.on('click', drawer.onAdd)
+            map.on('contextmenu', drawer.delete);
+
+        })
 
 </script>
 
