@@ -3,14 +3,15 @@ function Drawer(mask, storage, map) {
         markers: [],
         delete: function (e) {
             const circleToDelete = LGeo.circle(e.latlng, 25)
-            const currentGeoJson = storage.get()
-            if (currentGeoJson) {
-                const diff = turf.difference(currentGeoJson, circleToDelete.toGeoJSON())
-                if (diff !== null) {
-                    mask.setData(diff)
-                    storage.set(diff)
+            storage.get().then((geoJson) => {
+                if (geoJson) {
+                    const diff = turf.difference(geoJson, circleToDelete.toGeoJSON())
+                    if (diff !== null) {
+                        mask.setData(diff)
+                        storage.set(diff)
+                    }
                 }
-            }
+            })
         },
         onAdd: function (e) {
             const marker = new L.Marker(e.latlng)
@@ -52,7 +53,7 @@ function GpxDrawer(mask, storage, map) {
         draw: (gpxDoc) => {
             const trackPoints = Array.from(gpxDoc.getElementsByTagName("trkpt"));
             const latlngs = trackPoints.map((trkpnt) => container._xmlTrackPointToLatLng(trkpnt))
-            const groups = container._group(latlngs, 50)
+            const groups = container._group(latlngs, 200)
             var polygonGeoJSON = undefined
             for (let group of groups) {
                 const polLatLng = _joinLinesInPolygon(group)
@@ -103,11 +104,13 @@ const _joinLinesInPolygon = (points) => {
 }
 
 const _joinPolygonGeoJsonWithCurrentGeoJson = (storage, mask, polygonGeoJson) => {
-    const currentGeoJson = storage.get()
-    if (currentGeoJson) {
-        polygonGeoJson = turf.union(currentGeoJson, polygonGeoJson);
-    }
-    mask.setData(polygonGeoJson)
-    storage.set(polygonGeoJson)
-    map.fitBounds(L.geoJSON(polygonGeoJson).getBounds())
+
+    storage.get().then((geoJson) => {
+        if (geoJson) {
+            polygonGeoJson = turf.union(geoJson, polygonGeoJson);
+        }
+        mask.setData(polygonGeoJson)
+        storage.set(polygonGeoJson)
+        map.fitBounds(L.geoJSON(polygonGeoJson).getBounds())
+    })
 }

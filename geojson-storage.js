@@ -1,16 +1,27 @@
 function GeoJsonStorage() {
-    const key = "geojson"
+    const CACHE_NAME = "geojson"
+    const CACHE_KEY = "https://xxxx/geojson.json"
     return {
         set: function (geojson) {
-            window.localStorage.setItem(key, JSON.stringify(geojson))
+            caches.open(CACHE_NAME)
+                .then(function (cache) {
+                    cache.put(CACHE_KEY, new Response(JSON.stringify(geojson)));
+                })
+                .catch(err => console.log(`Cannot open the cache, error: ${err}`))
         },
 
-        get: function () {
-            const contents = window.localStorage.getItem(key);
-            if (contents) {
-                return JSON.parse(contents)
-            }
-            return undefined
+        get: async function () {
+            return caches.open(CACHE_NAME)
+                .then(cache => cache.match(CACHE_KEY))
+                .then(response => {
+                    if (response)
+                        return response.json()
+                    return undefined
+                })
+                .catch(err => console.log(`Cannot get the contents from the cache, error: ${err}`))
+        },
+        clear: function () {
+            caches.delete(CACHE_NAME)
         }
     }
 }
@@ -67,8 +78,10 @@ function GeoJsonSaver(storage) {
     const save = async () => {
         const fileHandle = await window.showSaveFilePicker(geoJsonPickerOpts);
         const writable = await fileHandle.createWritable();
-        await writable.write(JSON.stringify(storage.get()));
-        await writable.close();
+
+        storage.get()
+            .then((geoJson) => writable.write(JSON.stringify(geoJson)))
+            .then(() => writable.close())
     }
     var btn = L.easyButton('fa-save', save);
     return btn;
