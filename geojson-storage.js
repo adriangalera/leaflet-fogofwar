@@ -44,8 +44,9 @@ const gpxPickerOpts = {
             accept: {
                 'application/gpx+xml': ['.gpx']
             }
-        },
-    ]
+        }
+    ],
+    multiple: true
 };
 
 function GeoJsonLoader(storage, mask) {
@@ -64,11 +65,16 @@ function GeoJsonLoader(storage, mask) {
 function GpxAdder(drawer) {
 
     const addGpx = async () => {
-        [fileHandle] = await window.showOpenFilePicker(gpxPickerOpts);
-        const file = await fileHandle.getFile();
-        const content = await file.text();
-        var gpxDom = (new DOMParser()).parseFromString(content, 'text/xml');
-        drawer.draw(gpxDom)
+        const fileHandlers = await window.showOpenFilePicker(gpxPickerOpts);
+        //starts loading
+        for (let fh of fileHandlers) {
+            const file = await fh.getFile();
+            const content = await file.text();
+            var gpxDom = (new DOMParser()).parseFromString(content, 'text/xml');
+            drawer.draw(gpxDom)
+        }
+        // ends loading
+
     }
     var btn = L.easyButton('fa-plus', addGpx);
     return btn;
