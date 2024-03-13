@@ -1,0 +1,7 @@
+node_modules
+coverage
+scripts/gpx
+gpx
+scripts/ids.csv
+data
+.DS_Store

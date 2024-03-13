@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Leaflet fog of war</title>
+    <meta charset="utf-8">
+    <style type="text/css">
+        body {
+            padding: 0;
+            margin: 0;
+        }
+
+        html,
+        body,
+        #map {
+            height: 100%;
+        }
+    </style>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <!-- Make sure you put this AFTER Leaflet's CSS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.css">
+    <script src="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.js"></script>
+    <script src="https://kit.fontawesome.com/9ed6982e32.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <div id='map'></div>
+</body>
+
+<!-- leaflet geojson vt  -->
+<script src="https://unpkg.com/geojson-vt@3.2.0/geojson-vt.js"></script>
+<script src="leaflet-geojson-vt.js"></script>
+<script type="module" src="index.js"></script>
+
+<!-- tracks data -->
+<!--<script src="./data/tracks.js"></script>-->
+
+</html>
