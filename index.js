@@ -1,9 +1,10 @@
 import { addProgressBar } from './progressbar/creator.js'
 import { opacity } from './opacity/opacity.js'
-import { GeoJsonLoader, GeoJsonSaver } from './storage/geojson-io.js'
 import { GeoJsonStorage } from './storage/storage.js'
 import { GeoJsonContainer } from './geojson/container.js'
 import { config } from './config/config.js'
+import { CacheGeoJsonStorage } from './storage/cache-storage.js'
+import { HttpGeoJsonStorage } from './storage/http-storage.js'
 
 const map = L.map("map", {
     center: [41.53289317099601, 2.104000992549118],
@@ -24,13 +25,14 @@ const progressBar = addProgressBar(map)
 progressBar.stop()
 
 const geoJsonContainer = new GeoJsonContainer(map)
-const storage = new GeoJsonStorage()
+const storage = new GeoJsonStorage(new CacheGeoJsonStorage(), new HttpGeoJsonStorage(config))
 
-new GeoJsonLoader(progressBar, storage, geoJsonContainer).addTo(map)
+//new GeoJsonLoader(progressBar, storage, geoJsonContainer).addTo(map)
 //new GeoJsonSaver(progressBar, storage).addTo(map)
 
 progressBar.load()
-storage.all()
+storage.get()
+    //.then((contents) => contents.json())
     .then((contents) => geoJsonContainer.set(contents))
     .then(() => progressBar.stop())
 
