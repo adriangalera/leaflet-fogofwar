@@ -27,12 +27,8 @@ progressBar.stop()
 const geoJsonContainer = new GeoJsonContainer(map)
 const storage = new GeoJsonStorage(new CacheGeoJsonStorage(), new HttpGeoJsonStorage(config))
 
-//new GeoJsonLoader(progressBar, storage, geoJsonContainer).addTo(map)
-//new GeoJsonSaver(progressBar, storage).addTo(map)
-
 progressBar.load()
 storage.get()
-    //.then((contents) => contents.json())
     .then((contents) => geoJsonContainer.set(contents))
     .then(() => progressBar.stop())
 
@@ -42,3 +38,8 @@ map.on('zoomend', function () {
     const newOpacity = opacity.compute(currentZoom, config.minOpacity, config.maxOpacity)
     osm.setOpacity(newOpacity);
 });
+
+var saveButton = L.easyButton('fa-save', storage.saveToFile);
+saveButton.addTo(map);
+var refreshButton = L.easyButton('fa-refresh', storage.reload);
+refreshButton.addTo(map);
