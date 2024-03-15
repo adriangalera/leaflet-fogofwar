@@ -16,11 +16,26 @@ const removeCoordTimes = (geojson) => {
     }
 }
 
-const geoJsonLineToPolygon = (geojson) => {
-    if (geojson) {
-        const linestring = turf.lineString(geojson.geometry.coordinates);
-        const buffered = buffer(linestring, 10, { units: 'meters' });
+const geoJsonLineToPolygon = (feature) => {
+    if (feature) {
+        const linestring = turf.lineString(feature.geometry.coordinates);
+        const buffered = buffer(linestring, 5, { units: 'meters' });
         return buffered
+    }
+}
+
+const reducePoints = (feature) => {
+    if (feature) {
+        const factor = 10; //will consider only 1 of each <factor> points
+        if (feature.geometry.coordinates.length > factor) {
+            let newCoords = []
+            for (i = 0; i < feature.geometry.coordinates.length; i = i + factor) {
+                newCoords.push(feature.geometry.coordinates[i]);
+            }
+            feature.geometry.coordinates = newCoords
+            return feature
+        }
+        return feature
     }
 }
 
@@ -30,7 +45,8 @@ const gpxToGeoJson = async (filename) => {
         .then(fileContents => new DOMParser().parseFromString(fileContents))
         .then(gpx => tj.gpx(gpx))
         .then(geojson => removeCoordTimes(geojson))
-        .then(geojson => geoJsonLineToPolygon(geojson))
+        .then(feature => reducePoints(feature))
+        .then(feature => geoJsonLineToPolygon(feature))
 }
 
 (async () => {
