@@ -41,5 +41,11 @@ map.on('zoomend', function () {
 
 var saveButton = L.easyButton('fa-save', storage.saveToFile);
 saveButton.addTo(map);
-var refreshButton = L.easyButton('fa-refresh', storage.reload);
+var refreshButton = L.easyButton('fa-refresh', () => {
+    const hash = "ead992c2a075406ce53dbc975db99656ffaa63b7751797bf42efc411243c8f67eef43ebb81cbbb9bd065cb517e44d1802565f5ea745eb0db45b9b164d8cc1f54";
+    let password = prompt("Please enter the password");
+    if (hash === sha3_512(password)) {
+        storage.reload()
+    }
+});
 refreshButton.addTo(map);
