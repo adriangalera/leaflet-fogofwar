@@ -4,3 +4,5 @@ scripts/gpx
 gpx
 scripts/ids.csv
 .DS_Store
+
+scripts/data.json

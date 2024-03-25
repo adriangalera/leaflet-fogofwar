@@ -12,7 +12,8 @@ There's a script ready to download the GPX tracks from sportstracker, usage:
 2. Extract the token and the IDs of the tracks to download with the JS functions written in the script.
 3. Invoke the script
 ```bash
-node scripts/sports-tracker-downloader.js <token> scripts/ids.csv
+node scripts/sports-tracker-extractor.js
+node scripts/sports-tracker-downloader.js
 ```
 ## Process GPX Data
 
