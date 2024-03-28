@@ -50,7 +50,7 @@ const displayAllWorkouts = async (page) => {
             const showMoreButton = page.locator("#content > div > div.diary-list > div.diary-list__list.diary-list__ordered-by-date > div")
             await showMoreButton.click()
         } catch (err) { }
-        console.log("Loaded workouts: " + workouts)
+        console.log("Loaded workouts: " + workouts.length)
         await page.waitForTimeout(500);
         workouts = await extractIds(page);
         allLoaded = workouts.length > 0 && workouts.length == workoutCount
