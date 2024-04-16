@@ -26,7 +26,7 @@ const geoJsonLineToPolygon = (feature) => {
 
 const reducePoints = (feature) => {
     if (feature) {
-        const factor = 10; //will consider only 1 of each <factor> points
+        const factor = 7; //will consider only 1 of each <factor> points
         if (feature.geometry.coordinates.length > factor) {
             let newCoords = []
             for (i = 0; i < feature.geometry.coordinates.length; i = i + factor) {
