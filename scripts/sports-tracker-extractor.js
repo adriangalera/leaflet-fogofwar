@@ -9,7 +9,6 @@ const { writeFileSync } = require('fs');
 chromium.use(stealth)
 
 const login = async (page) => {
-    let frames = page.mainFrame().childFrames().length;
     const username = await read.read({
         prompt: "Username: ",
     });
