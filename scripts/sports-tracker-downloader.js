@@ -39,9 +39,9 @@ const downloadAllWorkouts = async () => {
     const token = data.token
     const workoutIds = data.ids
     for (let i = 0; i < workoutIds.length; i++) {
-        const id = workoutIds[i]
-        if (!alreadyDownloaded(id)) {
-            downloadGpx(id, i + 1, workoutIds.length, token)
+        const workout = workoutIds[i]
+        if (!alreadyDownloaded(workout.id)) {
+            downloadGpx(workout.id, i + 1, workoutIds.length, token)
             await delay(1000)
         } else {
             console.log(`** Ignoring already downloaded ${id}`)

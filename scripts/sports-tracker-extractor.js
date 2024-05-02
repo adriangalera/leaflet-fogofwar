@@ -40,7 +40,7 @@ const waitForWorkouts = async (page) => {
 
 const displayAllWorkouts = async (page) => {
     let workoutCount = 0;
-    let workouts = await extractIds(page);
+    let workouts = await extractWorkouts(page);
 
     let allLoaded = false;
 
@@ -51,7 +51,7 @@ const displayAllWorkouts = async (page) => {
         } catch (err) { }
         console.log("Loaded workouts: " + workouts.length)
         await page.waitForTimeout(500);
-        workouts = await extractIds(page);
+        workouts = await extractWorkouts(page);
         allLoaded = workouts.length > 0 && workouts.length == workoutCount
         workoutCount = workouts.length
     }
@@ -66,24 +66,23 @@ const extractToken = async (page) => {
     })
     return downloadToken
 }
-const extractIds = async (page) => {
-    const ids = await page.evaluate(() => {
-        let ids = []
+const extractWorkouts = async (page) => {
+    return await page.evaluate(() => {
+        let workouts = []
         const items = document.querySelectorAll("ul.diary-list__workouts li a");
         for (let i = 0; i < items.length; i++) {
             const href = items[i].getAttribute("href");
+            const km = items[i].children[4].innerText
             const id = href.substr(href.lastIndexOf('/') + 1, 24);
-            ids.push(id)
+            workouts.push({ id: id, distance: km })
         }
-        return ids
+        return workouts
     })
-    return ids
-
 }
 
 (async () => {
     // Setup
-    const browser = await chromium.launch({ headless: true });
+    const browser = await chromium.launch({ headless: false });
     const context = await browser.newContext();
     const page = await context.newPage();
 
@@ -92,7 +91,7 @@ const extractIds = async (page) => {
     await waitForWorkouts(page)
     await displayAllWorkouts(page)
     const token = await extractToken(page)
-    const ids = await extractIds(page)
+    const workouts = await extractWorkouts(page)
 
     // Teardown
     await context.close();
@@ -100,7 +99,7 @@ const extractIds = async (page) => {
 
     data = {
         token: token,
-        ids: ids
+        ids: workouts
     }
     path = "scripts/data.json"
     writeFileSync(path, JSON.stringify(data, null, 2), 'utf8');
