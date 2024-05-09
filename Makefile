@@ -1,7 +1,7 @@
-make: extract download process
+make: download process
 
-extract:
-	node scripts/sports-tracker-extractor.js
+#extract:
+#	node scripts/sports-tracker-extractor.js
 
 download:
 	node scripts/sports-tracker-downloader.js
