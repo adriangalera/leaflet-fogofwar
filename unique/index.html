@@ -1,5 +1,5 @@
-<html>
 
+<html>
 <head>
     <style type="text/css">
         body {
@@ -12,6 +12,14 @@
         #map {
             height: 100%;
         }
+
+        .track1 {
+            background-color: red;
+        }
+
+        .track2 {
+            background-color: blue;
+        }
     </style>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
@@ -21,7 +29,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-gpx/1.7.0/gpx.min.js"></script>
 
 </head>
-
 <body>
     <div id="map"></div>
 </body>
@@ -41,15 +48,67 @@
     });
 
     osm.addTo(map);
-
-    new L.GPX("gpx/5f8f26cdb77c7d2fbd5c7d4a.gpx", { async: true }).on('loaded', function (e) {
-        map.fitBounds(e.target.getBounds());
-    }).addTo(map);
-
-    new L.GPX("gpx/5f8f26d13cb09e28c85c7d66.gpx", { async: true }).on('loaded', function (e) {
-        map.fitBounds(e.target.getBounds());
-    }).addTo(map);
-
-</script>
-
+    
+        marker = L.marker([41.55505,2.094405]).addTo(map);
+        marker._icon.classList.add("track1");
+        L.circle([41.55505,2.094405], 500).addTo(map);
+        marker = L.marker([41.55471,2.094112]).addTo(map);
+        marker._icon.classList.add("track2");
+        
+        marker = L.marker([41.559827,2.0829]).addTo(map);
+        marker._icon.classList.add("track1");
+        L.circle([41.559827,2.0829], 500).addTo(map);
+        marker = L.marker([41.560707,2.082382]).addTo(map);
+        marker._icon.classList.add("track2");
+        
+        marker = L.marker([41.56669,2.074213]).addTo(map);
+        marker._icon.classList.add("track1");
+        L.circle([41.56669,2.074213], 500).addTo(map);
+        marker = L.marker([41.566945,2.073205]).addTo(map);
+        marker._icon.classList.add("track2");
+        
+        marker = L.marker([41.574415,2.067805]).addTo(map);
+        marker._icon.classList.add("track1");
+        L.circle([41.574415,2.067805], 500).addTo(map);
+        marker = L.marker([41.57436,2.067875]).addTo(map);
+        marker._icon.classList.add("track2");
+        
+        marker = L.marker([41.579745,2.055898]).addTo(map);
+        marker._icon.classList.add("track1");
+        L.circle([41.579745,2.055898], 500).addTo(map);
+        marker = L.marker([41.579415,2.05704]).addTo(map);
+        marker._icon.classList.add("track2");
+        
+        marker = L.marker([41.579495,2.046353]).addTo(map);
+        marker._icon.classList.add("track1");
+        L.circle([41.579495,2.046353], 500).addTo(map);
+        marker = L.marker([41.580727,2.046382]).addTo(map);
+        marker._icon.classList.add("track2");
+        
+        marker = L.marker([41.567955,2.050855]).addTo(map);
+        marker._icon.classList.add("track1");
+        L.circle([41.567955,2.050855], 500).addTo(map);
+        marker = L.marker([41.570372,2.049515]).addTo(map);
+        marker._icon.classList.add("track2");
+        
+        marker = L.marker([41.564285,2.06379]).addTo(map);
+        marker._icon.classList.add("track1");
+        L.circle([41.564285,2.06379], 500).addTo(map);
+        marker = L.marker([41.564525,2.062605]).addTo(map);
+        marker._icon.classList.add("track2");
+        
+        marker = L.marker([41.559842,2.07464]).addTo(map);
+        marker._icon.classList.add("track1");
+        L.circle([41.559842,2.07464], 500).addTo(map);
+        marker = L.marker([41.559497,2.073945]).addTo(map);
+        marker._icon.classList.add("track2");
+        
+        marker = L.marker([41.554995,2.093853]).addTo(map);
+        marker._icon.classList.add("track1");
+        L.circle([41.554995,2.093853], 500).addTo(map);
+        marker = L.marker([41.555795,2.094945]).addTo(map);
+        marker._icon.classList.add("track2");
+        
+    </script>
 </html>
+    
