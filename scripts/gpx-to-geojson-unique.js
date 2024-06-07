@@ -99,7 +99,7 @@ const compareLatLons = (features1, features2) => {
 const similarTrack = (fileLatLon, latlons) => {
     for (const [filename, latlon] of Object.entries(fileLatLon)) {
         const { min, max, mean } = compareLatLons(latlons, latlon)
-        if (max < 0.5 && mean < 0.5) {
+        if (max < 0.4 && mean <= 0.2) {
             return { hasSimilarTrack: true, foundFilename: filename }
         }
     }
@@ -111,7 +111,7 @@ const similarTrack = (fileLatLon, latlons) => {
     const files = await fs.promises.readdir(GPX_FOLDER);
     const fileLatLon = {}
     let similarTracks = []
-    num_lat_lon_compare = 100
+    num_lat_lon_compare = 200
     for (const file of files) {
         const gpx = await parseGpx(file)
         const latlons = extractLatLonToCompare(gpx)
@@ -126,11 +126,11 @@ const similarTrack = (fileLatLon, latlons) => {
         }
     }
 
-    console.log(`Detected ${Object.keys(fileLatLon).length} unique tracks`)
+    console.log(`Detected ${Object.keys(fileLatLon).length} unique tracks and ${similarTracks.length} duplicated tracks`)
 
     if (DEBUG) {
         for (let similarFiles of similarTracks) {
-            cmd = `node unique/compare-two-tracks.js ${GPX_FOLDER}${similarFiles[0]} ${GPX_FOLDER}${similarFiles[1]} --debug`
+            cmd = `node unique/compare-two-tracks.js ${GPX_FOLDER}${similarFiles[0]} ${GPX_FOLDER}${similarFiles[1]} --debug --num ${num_lat_lon_compare}`
             console.log(cmd)
         }
     }

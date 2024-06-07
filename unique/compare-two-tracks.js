@@ -8,7 +8,7 @@ const turf = require("@turf/turf");
 const tmp = require('tmp');
 const { exec } = require("child_process");
 
-const generateLeafletHtml = (tracksHtml) => {
+const generateLeafletHtml = (tracksHtml, distances) => {
     return `
 <html>
 <head>
@@ -31,6 +31,14 @@ const generateLeafletHtml = (tracksHtml) => {
         .track2 {
             background-color: blue;
         }
+        #chart_div {
+            width: 600px;
+            height: 400px;
+            position: absolute;
+            top: 100px;
+            left: 10px;
+            z-index: 1000;
+        }
     </style>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
@@ -38,14 +46,16 @@ const generateLeafletHtml = (tracksHtml) => {
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-gpx/1.7.0/gpx.min.js"></script>
-
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 </head>
 <body>
-    <div id="map"></div>
+    <div id="map">
+            <div id="chart_div">
+        </div>
+    </div>
 </body>
 
 <script>
-
     const map = L.map("map", {
         center: [41.53289317099601, 2.104000992549118],
         zoom: 14
@@ -60,6 +70,27 @@ const generateLeafletHtml = (tracksHtml) => {
 
     osm.addTo(map);
     ${tracksHtml}
+    </script>
+    <script>
+        const distances = ${JSON.stringify(distances)}
+        google.charts.load("current", {packages:["corechart"]});
+        google.charts.setOnLoadCallback(drawChart);
+        function drawChart() {
+                const dataset = []
+        dataset.push(["Distance"])
+        for (let d of distances) {
+            dataset.push([d])
+        }
+        const data = google.visualization.arrayToDataTable(dataset)
+            var options = {
+                title: 'Distances',
+                legend: { position: 'none' },
+            };
+   
+            var chart = new google.visualization.Histogram(document.getElementById('chart_div'));
+            chart.draw(data, options);
+        }
+
     </script>
 </html>
     `
@@ -130,7 +161,7 @@ const stats = (distances) => {
         `
     }
     if (args.debug) {
-        const html = generateLeafletHtml(leafletHtml)
+        const html = generateLeafletHtml(leafletHtml, distances)
         const tmpobj = tmp.fileSync({ postfix: '.html' });
         fs.writeFileSync(tmpobj.fd, html)
         exec(`open ${tmpobj.name}`, {});
