@@ -1,12 +1,12 @@
-/*
-This script takes two tracks and compares them to see if its' the same
-*/
+#!/usr/bin/env node
+'use strict';
+
+const { ArgumentParser } = require('argparse');
 const fs = require('fs');
 const DOMParser = require('xmldom').DOMParser;
 const turf = require("@turf/turf");
-
-track1 = "gpx/608afd8ffc669f0409be19ff.gpx"
-track2 = "gpx/601ecf604a3d506328ccae7d.gpx"
+const tmp = require('tmp');
+const { exec } = require("child_process");
 
 const generateLeafletHtml = (tracksHtml) => {
     return `
@@ -65,16 +65,16 @@ const generateLeafletHtml = (tracksHtml) => {
     `
 }
 
-const gpxFeatures = async (filename) => {
+const gpxFeatures = async (filename, num_points) => {
     const latlongs = fs.promises.readFile(filename, 'utf-8')
         .then(fileContents => new DOMParser().parseFromString(fileContents))
         .then(gpx => gpx.getElementsByTagName("trkpt"))
         .then(trkpts => Array.from(trkpts).map(trkpt => [trkpt.getAttribute("lat"), trkpt.getAttribute("lon")]))
-        .then(trkpts => selectPoints(trkpts))
+        .then(trkpts => selectPoints(trkpts, num_points))
     return latlongs
 }
 
-const selectPoints = (arr, num_points = 10) => {
+const selectPoints = (arr, num_points) => {
     let points = []
     const idx_ind = Math.floor(arr.length / num_points)
     for (let i = 0; i < num_points - 1; i++) {
@@ -93,13 +93,24 @@ const stats = (distances) => {
         -Infinity);
     var mean = distances.reduce(function (a, b) { return a + b; }, 0)
         / distances.length;
-    return {min, max, mean}
+    return { min, max, mean }
 }
 
-
 (async () => {
-    const features1 = await gpxFeatures(track1)
-    const features2 = await gpxFeatures(track2)
+
+    const parser = new ArgumentParser({
+        description: 'Compares two GPX tracks'
+    });
+
+    parser.add_argument('first-track', { type: 'str', help: 'First track to compare' })
+    parser.add_argument('second-track', { type: 'str', help: 'Second track to compare' })
+    parser.add_argument('--debug', { help: 'Debug', action: 'store_true' });
+    parser.add_argument('--num-points', { help: 'Number of points to compare', const: 100, default: 100, nargs: '?' });
+
+    let args = parser.parse_args()
+
+    const features1 = await gpxFeatures(args["first-track"], args.num_points)
+    const features2 = await gpxFeatures(args["second-track"], args.num_points)
     let leafletHtml = "";
     let distances = []
     for (let i = 0; i < features1.length; i++) {
@@ -107,17 +118,23 @@ const stats = (distances) => {
             turf.point(features2[i]),
             { units: "kilometers" })
         distances.push(diff)
-        msg = `Comparing point ${features1[i]} vs ${features2[i]}. Distance (km): ${diff}`
+
+        //L.circle([${features1[i]}], 500).addTo(map);
+
         leafletHtml += `
         marker = L.marker([${features1[i]}]).addTo(map);
         marker._icon.classList.add("track1");
-        L.circle([${features1[i]}], 500).addTo(map);
+        
         marker = L.marker([${features2[i]}]).addTo(map);
         marker._icon.classList.add("track2");
         `
     }
-    const html = generateLeafletHtml(leafletHtml)
-    fs.writeFileSync("unique/index.html", html)
+    if (args.debug) {
+        const html = generateLeafletHtml(leafletHtml)
+        const tmpobj = tmp.fileSync({ postfix: '.html' });
+        fs.writeFileSync(tmpobj.fd, html)
+        exec(`open ${tmpobj.name}`, {});
+    }
 
     const { min, max, mean } = stats(distances)
     console.log(`Distances stats: max: ${max}, min: ${min}, mean: ${mean}`)

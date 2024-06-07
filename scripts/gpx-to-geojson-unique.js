@@ -6,6 +6,7 @@ const turf = require("@turf/turf");
 
 GPX_FOLDER = "gpx/";
 DATA_FILE = "data/tracks.geojson";
+DEBUG = true
 /*
 const removeCoordTimes = (geojson) => {
     const feature = geojson.features[0];
@@ -109,6 +110,7 @@ const similarTrack = (fileLatLon, latlons) => {
 (async () => {
     const files = await fs.promises.readdir(GPX_FOLDER);
     const fileLatLon = {}
+    let similarTracks = []
     num_lat_lon_compare = 100
     for (const file of files) {
         const gpx = await parseGpx(file)
@@ -117,7 +119,7 @@ const similarTrack = (fileLatLon, latlons) => {
             const pointsToCompare = selectPoints(latlons, num_points = num_lat_lon_compare)
             const { hasSimilarTrack, foundFilename } = similarTrack(fileLatLon, pointsToCompare)
             if (hasSimilarTrack) {
-                console.log(`Detected similar tracks: ${file} and ${foundFilename}`)
+                similarTracks.push([file, foundFilename])
             } else {
                 fileLatLon[file] = pointsToCompare
             }
@@ -125,6 +127,13 @@ const similarTrack = (fileLatLon, latlons) => {
     }
 
     console.log(`Detected ${Object.keys(fileLatLon).length} unique tracks`)
+
+    if (DEBUG) {
+        for (let similarFiles of similarTracks) {
+            cmd = `node unique/compare-two-tracks.js ${GPX_FOLDER}${similarFiles[0]} ${GPX_FOLDER}${similarFiles[1]} --debug`
+            console.log(cmd)
+        }
+    }
 
     /*
     const finalGeoJson = {
