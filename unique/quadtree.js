@@ -35,6 +35,9 @@ class QuadTreeNode {
         //console.log(`Checking ${lat},${lng} belongs to NE: ${JSON.stringify(this.northEastCoord)}}, NW: ${JSON.stringify(this.northWestCoord)}, SE: ${JSON.stringify(this.southEastCoord)}, SW: ${JSON.stringify(this.southWestCoord)}. With result: ${belongsToNode}`)
         return belongsToNode
     }
+    insertLatLng(lat, lng) {
+        return this.insert(new LngLat(lng, lat))
+    }
     insert(lnglat) {
         if (this.belongs(lnglat)) {
             this.values.push(lnglat)
@@ -89,9 +92,10 @@ class QuadTreeNode {
         return this.northEastChild != undefined && this.northWestChild != undefined && this.southEastChild != undefined && this.southWestChild != undefined
     }
     locationIsOnTree(lat, lng, tolerance_meters) {
-        return this.lngLatIsOnTree(new LngLat(lat, lng), tolerance_meters)
+        return this.lngLatIsOnTree(new LngLat(lng, lat), tolerance_meters)
     }
     lngLatIsOnTree(target, tolerance_meters = 10) {
+        if (!this.belongs(target)) return false;
         if (this.hasChildNodes()) {
             return this.northEastChild.lngLatIsOnTree(target, tolerance_meters) ||
                 this.southEastChild.lngLatIsOnTree(target, tolerance_meters) ||
@@ -127,7 +131,14 @@ class QuadTreeNode {
     }
 
 }
-module.exports = {
-    QuadTreeNode: QuadTreeNode,
-    LngLat: LngLat
+
+try {
+    module.exports = {
+        QuadTreeNode: QuadTreeNode,
+        LngLat: LngLat
+    }
+} catch (err) {
+    if (window) {
+        window.QuadTreeNode = QuadTreeNode
+    }
 }

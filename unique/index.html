@@ -1,0 +1,84 @@
+<html>
+
+<head>
+    <style type="text/css">
+        body {
+            padding: 0;
+            margin: 0;
+        }
+
+        html,
+        body,
+        #map {
+            height: 100%;
+        }
+    </style>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <!-- Make sure you put this AFTER Leaflet's CSS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-gpx/1.7.0/gpx.min.js"></script>
+    <script src="/unique/quadtree.js"></script>
+
+</head>
+
+<body>
+    <div id="map"></div>
+</body>
+
+<script>
+
+    const quadTree = window.QuadTreeNode.empty()
+
+    const map = L.map("map", {
+        center: [41.53289317099601, 2.104000992549118],
+        zoom: 14
+    });
+
+    const osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        zoom: 14,
+        zIndex: 1,
+        attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    });
+
+    osm.addTo(map);
+
+    fetch("/gpx/5f8f26cdb77c7d2fbd5c7d4a.gpx")
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error("Failed to fetch the file")
+            }
+            return response.text()
+        })
+        .then((data) => {
+            const parsed = new DOMParser().parseFromString(data, "text/xml")
+            //<trkpt xmlns="http://www.topografix.com/GPX/1/1" lat="41.541482" lon="2.116323"><ele>176.4</ele><time>2016-09-30T05:35:06Z</time></trkpt>
+            const points = parsed.getElementsByTagName("trkpt")
+            for (let point of points) {
+                const lat = parseFloat(point.getAttribute("lat"))
+                const lng = parseFloat(point.getAttribute("lon"))
+                if (!quadTree.locationIsOnTree(lat, lng, 5)) {
+                    console.log("Not in quadtree")
+                    quadTree.insertLatLng(lat, lng)
+                } else {
+                    console.log("** Already in quadtree **")
+                }
+            }
+            
+            //const [parsedFile, error] = parseGPX(data)
+        })
+    /*
+    new L.GPX("gpx/5f8f26cdb77c7d2fbd5c7d4a.gpx", { async: true }).on('loaded', function (e) {
+        map.fitBounds(e.target.getBounds());
+    }).addTo(map);
+
+    new L.GPX("gpx/5f8f26d13cb09e28c85c7d66.gpx", { async: true }).on('loaded', function (e) {
+        map.fitBounds(e.target.getBounds());
+    }).addTo(map);
+    */
+
+</script>
+
+</html>
