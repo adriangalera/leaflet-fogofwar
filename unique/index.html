@@ -28,8 +28,63 @@
 </body>
 
 <script>
-    const meters_tolerance = 5
-    const quadTree = window.QuadTreeNode.empty(2)
+    const meters_tolerance = 15
+    const quadTree = window.QuadTreeNode.empty()
+
+    var greenIcon = new L.Icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    });
+
+    var redIcon = new L.Icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    });
+
+    const loadTrack = (trackName, color) => {
+        return fetch(trackName)
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error("Failed to fetch the file")
+                }
+                return response.text()
+            })
+            .then((data) => {
+                let icon = redIcon;
+                if (color === "red") {
+                    icon = redIcon
+                } else {
+                    icon = greenIcon
+                }
+                const parsed = new DOMParser().parseFromString(data, "text/xml")
+                //<trkpt xmlns="http://www.topografix.com/GPX/1/1" lat="41.541482" lon="2.116323"><ele>176.4</ele><time>2016-09-30T05:35:06Z</time></trkpt>
+                const points = parsed.getElementsByTagName("trkpt")
+                let reducedPoints = []
+                factor = 1 // only consider 1 of each 1 points
+                for (i = 0; i < points.length; i = i + factor) {
+                    reducedPoints.push(points[i]);
+                }
+                for (let point of reducedPoints) {
+                    const lat = parseFloat(point.getAttribute("lat"))
+                    const lng = parseFloat(point.getAttribute("lon"))
+                    if (!quadTree.locationIsOnTree(lat, lng, meters_tolerance)) {
+                        //console.log(`Inserting ${lat},${lng}`)
+                        quadTree.insertLatLng(lat, lng)
+                        var marker = L.marker([lat, lng], { icon: icon }).addTo(map);
+                    } else {
+                        console.log("** Already in quadtree **")
+                    }
+                }
+            })
+    }
 
     const map = L.map("map", {
         center: [41.53289317099601, 2.104000992549118],
@@ -37,7 +92,7 @@
     });
 
     const osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        zoom: 14,
+        zoom: 20,
         zIndex: 1,
         attribution:
             '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -45,49 +100,9 @@
 
     osm.addTo(map);
 
-    fetch("/gpx/5f8f26cdb77c7d2fbd5c7d4a.gpx")
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error("Failed to fetch the file")
-            }
-            return response.text()
-        })
-        .then((data) => {
-            const parsed = new DOMParser().parseFromString(data, "text/xml")
-            //<trkpt xmlns="http://www.topografix.com/GPX/1/1" lat="41.541482" lon="2.116323"><ele>176.4</ele><time>2016-09-30T05:35:06Z</time></trkpt>
-            const points = parsed.getElementsByTagName("trkpt")
-            let i = 0
-            for (let point of points) {
-                const lat = parseFloat(point.getAttribute("lat"))
-                const lng = parseFloat(point.getAttribute("lon"))
-                if (!quadTree.locationIsOnTree(lat, lng, meters_tolerance)) {
-                    console.log(`Inserting ${lat},${lng}`)
-                    quadTree.insertLatLng(lat, lng)
-                } else {
-                    console.log("** Already in quadtree **")
-                }
-                i += 1
-                if (i > 10)
-                    break
-            }
-            
-            i = 0
-            for (let point of points) {
-                const lat = parseFloat(point.getAttribute("lat"))
-                const lng = parseFloat(point.getAttribute("lon"))
-                if (!quadTree.locationIsOnTree(lat, lng, meters_tolerance)) {
-                    console.log(`Inserting ${lat},${lng}`)
-                    quadTree.insertLatLng(lat, lng)
-                } else {
-                    console.log("** Already in quadtree **")
-                }
-                i += 1
-                if (i > 10)
-                    break
-            }
 
-            //const [parsedFile, error] = parseGPX(data)
-        })
+    loadTrack("/gpx/5f8f26cdb77c7d2fbd5c7d4a.gpx", "red")
+        .then(() => loadTrack("/gpx/5f8f26d13cb09e28c85c7d66.gpx", "green"))
     /*
     new L.GPX("gpx/5f8f26cdb77c7d2fbd5c7d4a.gpx", { async: true }).on('loaded', function (e) {
         map.fitBounds(e.target.getBounds());

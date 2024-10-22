@@ -146,7 +146,6 @@ test("reproduce bug in unique/index.html", () => {
     [41.541482, 2.116323],
     [41.541522, 2.116437],
     [41.541557, 2.116552],
-    /*
     [41.54151, 2.11667],
     [41.541413, 2.116737],
     [41.541327, 2.116807],
@@ -155,12 +154,10 @@ test("reproduce bug in unique/index.html", () => {
     [41.540962, 2.116977],
     [41.54084, 2.11703],
     [41.540743, 2.11709]
-    */
   ]
 
   const meters_tolerance = 5
   const quadTree = QuadTreeNode.empty(2)
-  quadTree.verbose = true
 
   for (let latLng of latLngs) {
     const lat = latLng[0]
@@ -175,5 +172,69 @@ test("reproduce bug in unique/index.html", () => {
     const lng = latLng[1]
     expect(quadTree.locationIsOnTree(lat, lng, meters_tolerance)).toBe(true)
   }
+})
 
+test('quad tree returns all bounding boxes', () => {
+  const maxCapacity = 2
+  const qt = QuadTreeNode.empty(maxCapacity)
+  qt.insert(new LngLat(0, 0))
+  qt.insert(new LngLat(0, 1))
+
+  expect(qt.hasChildNodes()).toBe(true)
+
+  //ne = [new LngLat(180, 90), new LngLat(0, 90), ]
+  const bb = qt.allBoundingBoxes()
+  const expectedBoundingBoxes = [
+    [
+      new LngLat(180, 90),
+      new LngLat(0, 90),
+      new LngLat(180, 0),
+      new LngLat(0, 0)
+    ],
+    [
+      new LngLat(0, 90),
+      new LngLat(-180, 90),
+      new LngLat(0, 0),
+      new LngLat(-180, 0)
+    ],
+    [
+      new LngLat(180, 0),
+      new LngLat(0, 0),
+      new LngLat(180, -90),
+      new LngLat(0, -90)
+    ],
+    [
+      new LngLat(0, 0),
+      new LngLat(-180, 0),
+      new LngLat(0, -90),
+      new LngLat(-180, -90)
+    ]
+  ]
+  expect(bb).toEqual(expectedBoundingBoxes)
+
+  /*
+  // North east child
+  expect(qt.northEastChild.northEastCoord).toEqual()
+  expect(qt.northEastChild.northWestCoord).toEqual()
+  expect(qt.northEastChild.southEastCoord).toEqual(new LngLat(180, 0))
+  expect(qt.northEastChild.southWestCoord).toEqual(new LngLat(0, 0))
+
+  //North west child
+  expect(qt.northWestChild.northEastCoord).toEqual(new LngLat(0, 90))
+  expect(qt.northWestChild.northWestCoord).toEqual(new LngLat(-180, 90))
+  expect(qt.northWestChild.southEastCoord).toEqual(new LngLat(0, 0))
+  expect(qt.northWestChild.southWestCoord).toEqual(new LngLat(-180, 0))
+
+  //South east child
+  expect(qt.southEastChild.northEastCoord).toEqual(new LngLat(180, 0))
+  expect(qt.southEastChild.northWestCoord).toEqual(new LngLat(0, 0))
+  expect(qt.southEastChild.southEastCoord).toEqual(new LngLat(180, -90))
+  expect(qt.southEastChild.southWestCoord).toEqual(new LngLat(0, -90))
+
+  //South west child
+  expect(qt.southWestChild.northEastCoord).toEqual(new LngLat(0, 0))
+  expect(qt.southWestChild.northWestCoord).toEqual(new LngLat(-180, 0))
+  expect(qt.southWestChild.southEastCoord).toEqual(new LngLat(0, -90))
+  expect(qt.southWestChild.southWestCoord).toEqual(new LngLat(-180, -90))
+  */
 })

@@ -34,21 +34,25 @@ class QuadTreeNode {
         return this.belongsLatLng(lnglat.lat, lnglat.lng)
     }
     belongsLatLng(lat, lng) {
-        const belongsToNode =
-            lng <= this.northEastCoord.lng && lng > this.northWestCoord.lng &&
+        return lng <= this.northEastCoord.lng && lng > this.northWestCoord.lng &&
             lat <= this.northWestCoord.lat && lat > this.southWestCoord.lat
-
-        if (this.verbose) {
-            console.log(`${lat},${lng} belongs to ${this.json()}`)
-        }
-
-        return belongsToNode
     }
     insertLatLng(lat, lng) {
         return this.insert(new LngLat(lng, lat))
     }
     insert(lnglat) {
-        if (this.belongs(lnglat)) {
+        if (!this.belongs(lnglat)) {
+            return false
+        }
+        if (this.hasChildNodes()) {
+            const insertedNorthEast = this.northEastChild.insert(lnglat)
+            const insertedNorthWest = this.northWestChild.insert(lnglat)
+            const insertedSouthEast = this.southEastChild.insert(lnglat)
+            const insertedSouthWest = this.southWestChild.insert(lnglat)
+            if (this.verbose)
+                console.log(`Item ${JSON.stringify(lnglat)} inserted in NE:${insertedNorthEast}, NW:·${insertedNorthWest}, SE:${insertedSouthEast}, SW:${insertedSouthWest}`)
+            return insertedNorthEast || insertedNorthWest || insertedSouthEast || insertedSouthWest
+        } else {
             if (this.verbose)
                 console.log(`Insert ${JSON.stringify(lnglat)} into ${this.json()}`)
             this.values.push(lnglat)
@@ -99,8 +103,9 @@ class QuadTreeNode {
             }
 
             return true
+
+
         }
-        return false
     }
     hasChildNodes() {
         return this.northEastChild != undefined && this.northWestChild != undefined && this.southEastChild != undefined && this.southWestChild != undefined
@@ -142,6 +147,24 @@ class QuadTreeNode {
         // pi / 180 ~= 0.01745
         const lng_drift_allowed = coef / Math.cos(lat * 0.01745);
         return { lat_drift_allowed, lng_drift_allowed }
+    }
+    allBoundingBoxes() {
+        if (!this.hasChildNodes()) {
+            return [this.northEastCoord, this.northWestCoord, this.southEastCoord, this.southWestCoord]
+        }
+
+        let bb = []
+        const neBb = this.northEastChild.allBoundingBoxes()
+        const nwBb = this.northWestChild.allBoundingBoxes()
+        const seBb = this.southEastChild.allBoundingBoxes()
+        const swBb = this.southWestChild.allBoundingBoxes()
+
+        bb.push(neBb)
+        bb.push(nwBb)
+        bb.push(seBb)
+        bb.push(swBb)
+
+        return bb
     }
 
 }
