@@ -21,6 +21,11 @@ class QuadTreeNode {
         // node values
         this.values = []
         this.maxCapacity = maxCapacityperNode
+
+        this.verbose = false
+    }
+    json() {
+        return JSON.stringify({ "ne": this.northEastCoord, "nw": this.northWestCoord, "se": this.southEastCoord, "sw": this.southWestCoord })
     }
     static empty(maxCapacityperNode = 100) {
         return new QuadTreeNode(new LngLat(180, 90), new LngLat(-180, 90), new LngLat(180, -90), new LngLat(-180, -90), maxCapacityperNode)
@@ -32,7 +37,11 @@ class QuadTreeNode {
         const belongsToNode =
             lng <= this.northEastCoord.lng && lng > this.northWestCoord.lng &&
             lat <= this.northWestCoord.lat && lat > this.southWestCoord.lat
-        //console.log(`Checking ${lat},${lng} belongs to NE: ${JSON.stringify(this.northEastCoord)}}, NW: ${JSON.stringify(this.northWestCoord)}, SE: ${JSON.stringify(this.southEastCoord)}, SW: ${JSON.stringify(this.southWestCoord)}. With result: ${belongsToNode}`)
+
+        if (this.verbose) {
+            console.log(`${lat},${lng} belongs to ${this.json()}`)
+        }
+
         return belongsToNode
     }
     insertLatLng(lat, lng) {
@@ -40,10 +49,13 @@ class QuadTreeNode {
     }
     insert(lnglat) {
         if (this.belongs(lnglat)) {
+            if (this.verbose)
+                console.log(`Insert ${JSON.stringify(lnglat)} into ${this.json()}`)
             this.values.push(lnglat)
 
             if (this.values.length >= this.maxCapacity) {
-                //console.log("Splitting into four nodes more ....")
+                if (this.verbose)
+                    console.log("Splitting into four nodes more ....")
                 this.northEastChild = new QuadTreeNode(
                     this.northEastCoord,
                     new LngLat((this.northEastCoord.lng + this.northWestCoord.lng) / 2, this.northEastCoord.lat),
@@ -78,9 +90,11 @@ class QuadTreeNode {
                     const insertedNorthWest = this.northWestChild.insert(item)
                     const insertedSouthEast = this.southEastChild.insert(item)
                     const insertedSouthWest = this.southWestChild.insert(item)
-                    //console.log(`Item ${JSON.stringify(item)} inserted in NE:${insertedNorthEast}, NW:·${insertedNorthWest}, SE:${insertedSouthEast}, SW:${insertedSouthWest}`)
+                    if (this.verbose)
+                        console.log(`Item ${JSON.stringify(item)} inserted in NE:${insertedNorthEast}, NW:·${insertedNorthWest}, SE:${insertedSouthEast}, SW:${insertedSouthWest}`)
                 }
-
+                if (this.verbose)
+                    console.log(`Reset items in ${JSON.stringify(this.json())}`)
                 this.values = []
             }
 

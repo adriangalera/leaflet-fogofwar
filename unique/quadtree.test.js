@@ -140,3 +140,40 @@ test("meters to lat/lng", () => {
   expect(lat_drift_allowed).toEqual(0.00008983111749910169)
   expect(lng_drift_allowed).toEqual(0.00011968239493702266)
 })
+
+test("reproduce bug in unique/index.html", () => {
+  const latLngs = [
+    [41.541482, 2.116323],
+    [41.541522, 2.116437],
+    [41.541557, 2.116552],
+    /*
+    [41.54151, 2.11667],
+    [41.541413, 2.116737],
+    [41.541327, 2.116807],
+    [41.541235, 2.11685],
+    [41.541085, 2.116917],
+    [41.540962, 2.116977],
+    [41.54084, 2.11703],
+    [41.540743, 2.11709]
+    */
+  ]
+
+  const meters_tolerance = 5
+  const quadTree = QuadTreeNode.empty(2)
+  quadTree.verbose = true
+
+  for (let latLng of latLngs) {
+    const lat = latLng[0]
+    const lng = latLng[1]
+
+    if (!quadTree.locationIsOnTree(lat, lng, meters_tolerance)) {
+      quadTree.insertLatLng(lat, lng)
+    }
+  }
+  for (let latLng of latLngs) {
+    const lat = latLng[0]
+    const lng = latLng[1]
+    expect(quadTree.locationIsOnTree(lat, lng, meters_tolerance)).toBe(true)
+  }
+
+})

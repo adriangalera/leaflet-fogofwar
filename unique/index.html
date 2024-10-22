@@ -28,8 +28,8 @@
 </body>
 
 <script>
-
-    const quadTree = window.QuadTreeNode.empty()
+    const meters_tolerance = 5
+    const quadTree = window.QuadTreeNode.empty(2)
 
     const map = L.map("map", {
         center: [41.53289317099601, 2.104000992549118],
@@ -56,17 +56,36 @@
             const parsed = new DOMParser().parseFromString(data, "text/xml")
             //<trkpt xmlns="http://www.topografix.com/GPX/1/1" lat="41.541482" lon="2.116323"><ele>176.4</ele><time>2016-09-30T05:35:06Z</time></trkpt>
             const points = parsed.getElementsByTagName("trkpt")
+            let i = 0
             for (let point of points) {
                 const lat = parseFloat(point.getAttribute("lat"))
                 const lng = parseFloat(point.getAttribute("lon"))
-                if (!quadTree.locationIsOnTree(lat, lng, 5)) {
-                    console.log("Not in quadtree")
+                if (!quadTree.locationIsOnTree(lat, lng, meters_tolerance)) {
+                    console.log(`Inserting ${lat},${lng}`)
                     quadTree.insertLatLng(lat, lng)
                 } else {
                     console.log("** Already in quadtree **")
                 }
+                i += 1
+                if (i > 10)
+                    break
             }
             
+            i = 0
+            for (let point of points) {
+                const lat = parseFloat(point.getAttribute("lat"))
+                const lng = parseFloat(point.getAttribute("lon"))
+                if (!quadTree.locationIsOnTree(lat, lng, meters_tolerance)) {
+                    console.log(`Inserting ${lat},${lng}`)
+                    quadTree.insertLatLng(lat, lng)
+                } else {
+                    console.log("** Already in quadtree **")
+                }
+                i += 1
+                if (i > 10)
+                    break
+            }
+
             //const [parsedFile, error] = parseGPX(data)
         })
     /*
