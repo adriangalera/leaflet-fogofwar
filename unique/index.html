@@ -28,7 +28,7 @@
 </body>
 
 <script>
-    const meters_tolerance = 15
+    const meters_tolerance = 10
     const quadTree = window.QuadTreeNode.empty()
 
     var greenIcon = new L.Icon({
@@ -58,31 +58,44 @@
                 return response.text()
             })
             .then((data) => {
+
                 let icon = redIcon;
                 if (color === "red") {
                     icon = redIcon
                 } else {
                     icon = greenIcon
                 }
+
                 const parsed = new DOMParser().parseFromString(data, "text/xml")
                 //<trkpt xmlns="http://www.topografix.com/GPX/1/1" lat="41.541482" lon="2.116323"><ele>176.4</ele><time>2016-09-30T05:35:06Z</time></trkpt>
                 const points = parsed.getElementsByTagName("trkpt")
                 let reducedPoints = []
-                factor = 1 // only consider 1 of each 1 points
+                factor = 10 // only consider 1 of each 10 points
                 for (i = 0; i < points.length; i = i + factor) {
                     reducedPoints.push(points[i]);
                 }
+
+                let duplicatedPoints = 0
+                let totalPoints = reducedPoints.length
+
                 for (let point of reducedPoints) {
                     const lat = parseFloat(point.getAttribute("lat"))
                     const lng = parseFloat(point.getAttribute("lon"))
+
+                    /*
                     if (!quadTree.locationIsOnTree(lat, lng, meters_tolerance)) {
                         //console.log(`Inserting ${lat},${lng}`)
                         quadTree.insertLatLng(lat, lng)
                         var marker = L.marker([lat, lng], { icon: icon }).addTo(map);
                     } else {
                         console.log("** Already in quadtree **")
+                        duplicatedPoints++
                     }
+                        */
+                    var marker = L.marker([lat, lng], { icon: icon }).addTo(map);
                 }
+
+                console.log(`Found ${duplicatedPoints} over ${totalPoints}. (${(duplicatedPoints / totalPoints) * 100.0} %)`)
             })
     }
 
@@ -101,8 +114,8 @@
     osm.addTo(map);
 
 
-    loadTrack("/gpx/5f8f26cdb77c7d2fbd5c7d4a.gpx", "red")
-        .then(() => loadTrack("/gpx/5f8f26d13cb09e28c85c7d66.gpx", "green"))
+    loadTrack("/gpx/63a6e329dc6b1e098e99b5ad.gpx", "red")
+        .then(() => loadTrack("/gpx/63317ec94fcc6c44e3abe40e.gpx", "green"))
     /*
     new L.GPX("gpx/5f8f26cdb77c7d2fbd5c7d4a.gpx", { async: true }).on('loaded', function (e) {
         map.fitBounds(e.target.getBounds());
