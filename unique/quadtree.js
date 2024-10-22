@@ -169,13 +169,13 @@ class QuadTreeNode {
 
 }
 
-try {
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+    // Node.js environment
     module.exports = {
         QuadTreeNode: QuadTreeNode,
         LngLat: LngLat
     }
-} catch (err) {
-    if (window) {
-        window.QuadTreeNode = QuadTreeNode
-    }
+} else if (typeof window !== 'undefined') {
+    // Browser environment
+    window.QuadTreeNode = QuadTreeNode
 }
