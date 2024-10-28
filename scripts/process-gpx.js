@@ -31,7 +31,7 @@ const buildQt = (points) => {
         const parsed = new DOMParser().parseFromString(fileContent)
         const points = parsed.getElementsByTagName("trkpt")
         if (points.length > 10) {
-            console.log(`Analyzing ${filename}`)
+            //console.log(`Analyzing ${filename}`)
             let needsMerge = false
             for (let trackName of Object.keys(qtreesByTrack)) {
                 let duplicatedFound = 0;
@@ -46,7 +46,8 @@ const buildQt = (points) => {
                 }
                 const dupPercentage = (duplicatedFound / points.length) * 100.0
                 if (dupPercentage > 80) {
-                    console.log(`Compare ${filename} vs ${trackName} Found ${duplicatedFound} duplicated points: (${dupPercentage} %)`)
+                    //console.log(`Compare ${filename} vs ${trackName} Found ${duplicatedFound} duplicated points: (${dupPercentage} %)`)
+                    console.log(`Compare ${filename} vs ${trackName} http://localhost:3000/unique?t1=${filename}&t2=${trackName}`)
                     needsMerge = true
                 }
             }

@@ -113,18 +113,16 @@
 
     osm.addTo(map);
 
+    const params = new Proxy(new URLSearchParams(window.location.search), {
+        get: (searchParams, prop) => searchParams.get(prop),
+    });
+    const track1 = params.t1;
+    const track2 = params.t2;
 
-    loadTrack("/gpx/63a6e329dc6b1e098e99b5ad.gpx", "red")
-        .then(() => loadTrack("/gpx/63317ec94fcc6c44e3abe40e.gpx", "green"))
-    /*
-    new L.GPX("gpx/5f8f26cdb77c7d2fbd5c7d4a.gpx", { async: true }).on('loaded', function (e) {
-        map.fitBounds(e.target.getBounds());
-    }).addTo(map);
+    console.log(track1, track2)
 
-    new L.GPX("gpx/5f8f26d13cb09e28c85c7d66.gpx", { async: true }).on('loaded', function (e) {
-        map.fitBounds(e.target.getBounds());
-    }).addTo(map);
-    */
+    loadTrack(`/gpx/${track1}`, "red")
+        .then(() => loadTrack(`/gpx/${track2}`, "green"))
 
 </script>
 
