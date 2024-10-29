@@ -1,19 +1,14 @@
 const fs = require('fs');
 const path = require('path');
-const { DOMParser, XMLSerializer } = require('xmldom');
+const { DOMParser } = require('xmldom');
 const { QuadTreeNode } = require('../unique/quadtree');
 const xpath = require('xpath');
 
 // Namespace resolver for the GPX default namespace
 const namespaces = { gpx: 'http://www.topografix.com/GPX/1/1' };
 const RAW_GPX_FOLDER = "gpx/";
-const DEDUP_GPX_FOLDER = "gpx-dedup/";
 const METERS_TOLERANCE = 10;
-
-const saveGPXFile = (doc, filePath) => {
-    const xml = new XMLSerializer().serializeToString(doc);
-    fs.writeFileSync(filePath, xml);
-};
+const DATA_FILE = "data/tracks.geojson";
 
 // Create a function to select nodes with namespaces
 const selectWithNamespace = (expression, node) => {
@@ -34,6 +29,30 @@ const getPointsFromTrack = (doc) => {
     }
     return selectWithNamespace('gpx:trkpt', trkseg);
 }
+// Save points into a GeoJSON file
+const savePointsToFile = (points, filePath) => {
+    let geojson = `
+{
+  "type": "FeatureCollection",
+  "features": [
+`
+    points.forEach((point) => {
+        geojson += `
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [${point[1]}, ${point[0]}]
+      }
+    },
+    `
+    })
+    // remove last comma:
+    geojson = geojson.substring(0, geojson.length - 6);
+    geojson += `]}`
+
+    fs.writeFileSync(filePath, geojson);
+}
 
 (async () => {
     let referenceQt = QuadTreeNode.empty()
@@ -43,26 +62,23 @@ const getPointsFromTrack = (doc) => {
         const filePath = path.join(RAW_GPX_FOLDER, filename);
         const trackDoc = loadGPXFile(filePath)
         const points = getPointsFromTrack(trackDoc)
-        let duplicatedFound = 0;
         let differentPoints = []
 
         for (var i = 0; i < points.length; i++) {
             const point = points[i]
             const lat = parseFloat(point.getAttribute("lat"))
             const lng = parseFloat(point.getAttribute("lon"))
-            if (referenceQt.locationIsOnTree(lat, lng, METERS_TOLERANCE)) {
-                duplicatedFound++
-            } else {
+            if (!referenceQt.locationIsOnTree(lat, lng, METERS_TOLERANCE)) {
                 referenceQt.insertLatLng(lat, lng)
                 differentPoints.push(point)
             }
         }
 
         if (count % 50 == 0)
-            console.log(`Accumulating points: ${count}/${files.length}`)
+            console.log(`Detecting unique GPX points: ${count}/${files.length}`)
 
-        //console.log(`Analysing ${filename}. Duplicates found: ${(duplicatedFound / points.length) * 100}`)
         count++
     }
-
+    const points = referenceQt.points()
+    savePointsToFile(points, DATA_FILE)
 })();

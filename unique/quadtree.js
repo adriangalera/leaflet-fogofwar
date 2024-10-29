@@ -148,25 +148,25 @@ class QuadTreeNode {
         const lng_drift_allowed = coef / Math.cos(lat * 0.01745);
         return { lat_drift_allowed, lng_drift_allowed }
     }
-    allBoundingBoxes() {
-        if (!this.hasChildNodes()) {
-            return [this.northEastCoord, this.northWestCoord, this.southEastCoord, this.southWestCoord]
+    points() {
+        let points = []
+        for (let p of this.values) {
+            points.push([p.lat, p.lng])
         }
 
-        let bb = []
-        const neBb = this.northEastChild.allBoundingBoxes()
-        const nwBb = this.northWestChild.allBoundingBoxes()
-        const seBb = this.southEastChild.allBoundingBoxes()
-        const swBb = this.southWestChild.allBoundingBoxes()
-
-        bb.push(neBb)
-        bb.push(nwBb)
-        bb.push(seBb)
-        bb.push(swBb)
-
-        return bb
+        this._addPoints(this.northEastChild, points)
+        this._addPoints(this.northWestChild, points)
+        this._addPoints(this.southEastChild, points)
+        this._addPoints(this.southWestChild, points)
+        return points
     }
-
+    _addPoints(x, points) {
+        if (x) {
+            for (let pointPair of x.points()) {
+                points.push(pointPair)
+            }
+        }
+    }
 }
 
 if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
