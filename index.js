@@ -117,7 +117,7 @@ Promise.all([
         })
     }
 
-    var mcgLayerSupportGroup = L.markerClusterGroup.layerSupport({ disableClusteringAtZoom: 11 }),
+    var mcgLayerSupportGroup = L.markerClusterGroup.layerSupport({ disableClusteringAtZoom: 13 }),
         centCimsGroup = L.layerGroup(),
         mendikatGroup = L.layerGroup(),
         control = L.control.layers(null, null, { collapsed: false });
