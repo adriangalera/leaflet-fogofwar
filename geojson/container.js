@@ -14,12 +14,12 @@ const options = {
     zIndex: 2,
 };
 
-function GeoJsonContainer(map) {
+function GeoJsonContainer() {
     return {
         set: function (geojson) {
-            L.geoJson.vt(geojson, options).addTo(map);
+            return L.geoJson.vt(geojson, options);
         }
-    }
+    };
 }
 
 export { GeoJsonContainer }
