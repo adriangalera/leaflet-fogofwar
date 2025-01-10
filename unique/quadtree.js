@@ -167,6 +167,60 @@ class QuadTreeNode {
             }
         }
     }
+    serialize() {
+        return JSON.stringify(this.toObject());
+    }
+
+    toObject() {
+        return {
+            northEastCoord: this.northEastCoord,
+            northWestCoord: this.northWestCoord,
+            southEastCoord: this.southEastCoord,
+            southWestCoord: this.southWestCoord,
+            values: this.values,
+            maxCapacity: this.maxCapacity,
+            hasChildren: this.hasChildNodes(),
+            northEastChild: this.northEastChild ? this.northEastChild.toObject() : null,
+            northWestChild: this.northWestChild ? this.northWestChild.toObject() : null,
+            southEastChild: this.southEastChild ? this.southEastChild.toObject() : null,
+            southWestChild: this.southWestChild ? this.southWestChild.toObject() : null,
+        };
+    }
+
+    static deserialize(serializedData) {
+        const data = JSON.parse(serializedData);
+        return this.fromObject(data);
+    }
+
+    static fromObject(data) {
+        // Create a new instance of QuadTreeNode
+        const node = new QuadTreeNode(
+            new LngLat(data.northEastCoord.lng, data.northEastCoord.lat),
+            new LngLat(data.northWestCoord.lng, data.northWestCoord.lat),
+            new LngLat(data.southEastCoord.lng, data.southEastCoord.lat),
+            new LngLat(data.southWestCoord.lng, data.southWestCoord.lat),
+            data.maxCapacity
+        );
+
+        // Restore the values array
+        node.values = data.values.map(item => new LngLat(item.lng, item.lat));
+
+        // Recursively restore child nodes
+        if (data.northEastChild) {
+            node.northEastChild = this.fromObject(data.northEastChild);
+        }
+        if (data.northWestChild) {
+            node.northWestChild = this.fromObject(data.northWestChild);
+        }
+        if (data.southEastChild) {
+            node.southEastChild = this.fromObject(data.southEastChild);
+        }
+        if (data.southWestChild) {
+            node.southWestChild = this.fromObject(data.southWestChild);
+        }
+
+        return node;
+    }
 }
 
 if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {

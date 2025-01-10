@@ -6,5 +6,6 @@ scripts/ids.csv
 .DS_Store
 
 scripts/data.json
+scripts/quadtree.bin
 dedup-gpx
 gpx-dedup
