@@ -1,4 +1,6 @@
-// Go to https://www.sports-tracker.com/diary/workout-list
+// 1. Go to https://www.sports-tracker.com/diary/workout-list
+// 2. Open Developer tools
+// 3. copy this code there (it will be auto executed)
 const extractToken = () => {
     const key = "sessionkey=";
     const valueStartIndex = document.cookie.indexOf(key) + key.length;

@@ -4,23 +4,31 @@ Based on https://github.com/ptma/Leaflet.Mask and using https://turfjs.org/ for 
 
 Check the <a href="https://www.agalera.eu/leaflet-fogofwar/">demo</a>
 
-## Download GPX Data
+## Add new GPX from Suunto sportstracker
 
-There's a script ready to download the GPX tracks from sportstracker, usage:
+Go to `scripts/sports-tracker-extractor-manual.js` and follow the instructions in the comments.
 
-1. Go to http://www.sports-tracker.com/diary/workout-list
-2. Extract the token and the IDs of the tracks to download with the JS functions written in the script.
-3. Invoke the script
+You must run the js code in the browser. It will generate and download a `data.json` file and should move it to the scripts folder.
+
 ```bash
-node scripts/sports-tracker-extractor.js
-node scripts/sports-tracker-downloader.js
+mv ~/Downloads/data.json scripts/.
 ```
+
+Run 
+```bash
+make download
+```
+
+To download the GPX files from sportstracker and build the quadtree.
+
 ## Process GPX Data
 
-All GPX tracks are processed into a very big GeoJSON loaded by leaflet-vt.
+All GPX track points are added first to a quadtree to discard repeated points.
+
+Later the quadtree is dumped into a very big GeoJSON loaded by leaflet-vt.
 
 To process the GPX data, you should run:
 
 ```bash
-node scripts/gpx-to-geojson.js
+make
 ```
